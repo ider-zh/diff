@@ -63,8 +63,8 @@ class MyTestCase1(unittest.TestCase):
 
 
     def test_feature_mulit_2(self):
-        dic1 = {'a':1,'b':[1,2,3],'c':{1,2},'d':{'a':1},'f':[0,{1,2,3}]}
-        dic2 = {'a':1,'b':[2,3],'c':{2,3},'d':{'a':1,'b':2},'f':[0,{2,3}]}
+        dic1 = {'a':1,'b':[1,2,3],'c':{1,2},'d':{'a':1},'f':[0,{1,2,3}],'g':[{'a':1,'b':1},{'a':2,'b':1}]}
+        dic2 = {'a':1,'b':[2,3],'c':{2,3},'d':{'a':1,'b':2},'f':[0,{2,3}],'g':[{'a':1,'b':1},{'a':1,'b':1}]}
         ret = diff(dic1,dic2)
         assert ret==[{'kind': 'E', 'path': ['b',0], 'lhs': 1, 'rhs': 2}, 
                     {'kind': 'E', 'path': ['b', 1], 'lhs': 2, 'rhs': 3}, 
@@ -72,14 +72,26 @@ class MyTestCase1(unittest.TestCase):
                     {'kind': 'D', 'path': ['c'], 'lhs': {1}}, 
                     {'kind': 'N', 'path': ['c'], 'rhs': {3}}, 
                     {'kind': 'N', 'path': ['d', 'b'], 'rhs': 2},
-                    {'kind': 'D', 'path': ['f', 1], 'lhs': {1}}
+                    {'kind': 'D', 'path': ['f', 1], 'lhs': {1}},
+                    {'kind': 'E', 'path': ['g', 1, 'a'], 'lhs': 2, 'rhs': 1}
                     ],ret
 
-    def test_feature_mulit_2(self):
+    def test_feature_mulit_3(self):
         dic1 = {'a':[],'b':False}
         dic2 = {'a':None,'b':None}
         ret = diff(dic1,dic2)
         assert ret==[{'kind': 'E', 'path': ['a'], 'lhs': [], 'rhs': None}, {'kind': 'E', 'path': ['b'], 'lhs': False, 'rhs': None}],ret
 
+
+
+    def test_feature_expt(self):
+        dic1 = {'a':1,'b':[1,2,3],'c':{1,2},'d':{'a':1},'f':[0,{1,2,3}],'g':[{'a':1,'b':1},{'a':2,'b':1}]}
+        dic2 = {'a':1,'b':[2,3],'c':{2,3},'d':{'a':1,'b':2},'f':[0,{2,3}],'g':[{'a':1,'b':1},{'a':1,'b':1}]}
+        ret = diff(dic1,dic2,[['b',],['g','a']])
+        assert ret==[{'kind': 'D', 'path': ['c'], 'lhs': {1}}, 
+                    {'kind': 'N', 'path': ['c'], 'rhs': {3}}, 
+                    {'kind': 'N', 'path': ['d', 'b'], 'rhs': 2},
+                    {'kind': 'D', 'path': ['f', 1], 'lhs': {1}},
+                    ],ret
 if __name__ == '__main__':
     unittest.main()

@@ -3,7 +3,7 @@
 from collections import OrderedDict
 
 
-def diff_set(set1,set2):
+def _diff_set(set1,set2):
     diff_post = []
     rd = set1 - set2
     ld = set2 - set1
@@ -13,10 +13,10 @@ def diff_set(set1,set2):
         diff_post.append({'kind':'N','path':[],'rhs':ld,})
     return diff_post
 
-def diff_list(list1, list2):
+def _diff_list(list1, list2):
     diff_post = []
     for i,(a,b) in enumerate(list(zip(list1,list2))):
-        router(a,b,diff_post,i)
+        _router(a,b,diff_post,i)
     if len(list1) > len(list2):
         for i in range(len(list2),len(list1)):
             diff_post.append({'kind':'A','path':[],"item": {'kind':'D','lhs':list1[i]},'index':i})
@@ -25,7 +25,7 @@ def diff_list(list1, list2):
             diff_post.append({'kind':'A','path':[],"item": {'kind':'N','rhs':list2[i]},'index':i})
     return diff_post
 
-def diff_dict(d1, d2):
+def _diff_dict(d1, d2):
     diff_post = []
     for e in sorted(list(set(d1.keys()) - set(d2.keys()))):
         diff_post.append({'kind':'D','path':[e],"lhs": d1[e]})
@@ -34,25 +34,25 @@ def diff_dict(d1, d2):
     for k, v1 in sorted(d1.items()):
         if k in d2:
             v2 = d2[k]
-            router(v1,v2,diff_post,k)
+            _router(v1,v2,diff_post,k)
     return diff_post
 
 
-def router(dict1,dict2,diff_post,k=None):
+def _router(dict1,dict2,diff_post,k=None):
     if isinstance(dict1,dict) and isinstance(dict2,dict):
-        ret_list = diff_dict(dict1, dict2)
+        ret_list = _diff_dict(dict1, dict2)
         if k !=None:
             list(map(lambda x:x['path'].insert(0,k),ret_list))
         diff_post.extend(ret_list)
 
     elif isinstance(dict1,list) and isinstance(dict2,list):
-        ret_list = diff_list(dict1, dict2)
+        ret_list = _diff_list(dict1, dict2)
         if k !=None:
             list(map(lambda x:x['path'].insert(0,k),ret_list))
         diff_post.extend(ret_list)
 
     elif isinstance(dict1,set) and isinstance(dict2,set):
-        ret_list = diff_set(dict1, dict2)
+        ret_list = _diff_set(dict1, dict2)
         if k !=None:
             list(map(lambda x:x['path'].insert(0,k),ret_list))
         diff_post.extend(ret_list)
@@ -63,8 +63,26 @@ def router(dict1,dict2,diff_post,k=None):
         else:
             diff_post.append({'kind':'E','path':[],'lhs':dict1,'rhs':dict2})
 
+def _diif_except(diff_dict,exceptDiff):
+    def _subset(l1,l2):
+        for a,b in zip(l1,l2):
+            if a != b:
+                return False
+        return True
 
-def diff(dict1, dict2):
+    diff_path = list(filter(lambda x:not isinstance(x,int),diff_dict['path']))
+    for exc in exceptDiff:
+        if exc == diff_path:
+            return True
+        elif len(exc) < len(diff_path):
+            if _subset(exc,diff_path):
+                return True
+
+    return False
+
+
+
+def diff(dict1, dict2, exceptDiff=None):
     def order_element(element):
         if isinstance(element,list):
             return [order_element(el) for el in element]
@@ -73,11 +91,14 @@ def diff(dict1, dict2):
         else:
             return element
 
-        if dict1 == dict2:
-            return None
+    if dict1 == dict2:
+        return None
 
     diff_post = []
-    d1 = order_element(dict1)
-    d2 = order_element(dict2)
-    router(d1,d2,diff_post)
-    return diff_post
+    # dict1 = order_element(dict1)
+    # dict2 = order_element(dict2)
+    _router(dict1,dict2,diff_post)
+    if exceptDiff:
+        diff_post = list(filter(lambda x:not _diif_except(x,exceptDiff),diff_post))
+    if diff_post:
+        return diff_post

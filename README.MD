@@ -1,5 +1,24 @@
 a tool to diff dict list set data output like the npm package [deep_diff](https://www.npmjs.com/package/deep-diff)
 
+# install
+`pip install deep-diff`
+# USAGE
+
+diff dict
+```
+from deep_diff import diff
+diff({'a':1,'c':1},{'b':1,'c':1})
+'diff({'a':1,'c':1},{'b':1,'c':1})'
+```
+
+Except path
+```
+from deep_diff import diff
+diff({'a':1,'c':1},{'b':1,'c':1},[['a'],['b']])
+''
+```
+
+more use can see test.py
 
 ``` json
 [ { kind: 'E',
