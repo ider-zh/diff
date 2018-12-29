@@ -8,7 +8,8 @@ diff dict
 ```
 from deep_diff import diff
 diff({'a':1,'c':1},{'b':1,'c':1})
-'diff({'a':1,'c':1},{'b':1,'c':1})'
+'[{'kind': 'D', 'path': ['a'], 'lhs': 1},
+ {'kind': 'N', 'path': ['b'], 'rhs': 1}]'
 ```
 
 Except path
