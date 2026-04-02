@@ -1,0 +1,96 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION (Tag: $TAG)"
+
+      - name: Verify version matches pyproject.toml
+        run: |
+          PYPROJECT_VERSION=$(grep '^version' pyproject.toml | cut -d'"' -f2)
+          GITHUB_VERSION=${{ steps.version.outputs.version }}
+          if [ "$PYPROJECT_VERSION" != "$GITHUB_VERSION" ]; then
+            echo "❌ Version mismatch!"
+            echo "   pyproject.toml: $PYPROJECT_VERSION"
+            echo "   Git tag: $GITHUB_VERSION"
+            exit 1
+          fi
+          echo "✅ Version matches: $PYPROJECT_VERSION"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build distribution
+        run: |
+          python -m build
+          echo "✅ Build completed"
+
+      - name: Check built artifacts
+        run: |
+          ls -lh dist/
+          echo "📦 Artifacts ready for upload"
+
+      - name: Publish to PyPI (using Trusted Publisher)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://upload.pypi.org/legacy/
+          verbose: true
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          release_name: "Release ${{ steps.version.outputs.tag }}"
+          body: |
+            ## 📦 Version ${{ steps.version.outputs.version }}
+            
+            This version has been automatically published to PyPI.
+            
+            ### Installation
+            ```bash
+            pip install deep-diff==${{ steps.version.outputs.version }}
+            ```
+            
+            ### 📝 Changes
+            Please check the commit history for detailed changes.
+            
+            ### 🔗 Links
+            - [PyPI Package](https://pypi.org/project/deep-diff/${{ steps.version.outputs.version }}/)
+            - [GitHub Repository](https://github.com/${{ github.repository }})
+          draft: false
+          prerelease: false
+
+      - name: Summary
+        run: |
+          echo "✅ Successfully published version ${{ steps.version.outputs.version }}"
+          echo "🔗 PyPI: https://pypi.org/project/deep-diff/${{ steps.version.outputs.version }}/"
+          echo "🏷️  Tag: ${{ steps.version.outputs.tag }}"
