@@ -1,22 +1,13 @@
+"""
+Setup configuration for deep-diff.
 
-import setuptools
+This file is kept for backwards compatibility.
+Modern Python packaging uses pyproject.toml instead.
+For installation, use: pip install -e .
+"""
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+from setuptools import setup, find_packages
 
-setuptools.setup(
-    name='deep_diff',
-    version='0.0.4',
-    url='https://github.com/ider-zh/diff',
-    license='BSD 3-Clause license',
-    author='ider',
-    author_email='326737833@qq.com',
-    description='a tool to diff dict list set data',
-    long_description = long_description,
-    long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
-    classifiers=[
-        'Topic :: Software Development :: Libraries',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3 :: Only'],
+setup(
+    packages=find_packages(),
 )
