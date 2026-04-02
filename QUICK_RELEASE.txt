@@ -1,0 +1,57 @@
+🚀 快速发布指南 - deep-diff
+
+═══════════════════════════════════════════════════════════════
+
+📦 完整发布流程（仅需 3 步）：
+
+1️⃣  更新版本号
+    vim pyproject.toml
+    # version = "0.2.0"
+
+2️⃣  创建 Git Tag 并推送
+    git add pyproject.toml
+    git commit -m "chore: bump version to 0.2.0"
+    git push origin master
+    git tag -a v0.2.0 -m "Release version 0.2.0"
+    git push origin v0.2.0
+
+3️⃣  完成！自动发布到 PyPI 🎉
+    ✅ GitHub Actions 自动执行
+    ✅ 包发布到 PyPI
+    ✅ GitHub Release 创建
+
+═══════════════════════════════════════════════════════════════
+
+📊 工作流信息：
+
+文件: .github/workflows/publish.yml
+触发: Git tag push (v0.2.0 或 0.2.0)
+可用在: https://github.com/ider-zh/diff/actions
+
+═══════════════════════════════════════════════════════════════
+
+📝 文档参考：
+
+- PUBLISH_GUIDE.md - 详细发布指南
+- TRUSTED_PUBLISHER_SETUP.md - PyPI 配置说明
+
+═══════════════════════════════════════════════════════════════
+
+✨ 特性：
+
+✅ 自动构建 wheel 和 source distribution
+✅ 版本号自动验证（tag vs pyproject.toml）
+✅ 使用 Trusted Publisher (无需存储 token)
+✅ 自动创建 GitHub Release
+✅ 失败时自动回滚
+
+═══════════════════════════════════════════════════════════════
+
+⚠️  第一次使用时需要配置：
+
+在 PyPI 项目设置中添加 Trusted Publisher：
+https://pypi.org/manage/project/deep-diff/settings/publishing
+
+参考: TRUSTED_PUBLISHER_SETUP.md
+
+═══════════════════════════════════════════════════════════════
